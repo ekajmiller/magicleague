@@ -1,10 +1,22 @@
-<h1>Seasons</h1>
-{% if season_list %}
-    <ul>
-    {% for season in season_list %}
-        <li><a href="/leaguematches/season/{{ season.id }}/">{{ season }}</a></li>
-    {% endfor %}
-    </ul>
-{% else %}
+<h1>Welcome to "Xerithas" revived</h1>
+Yes we all know George's site was awesome, but I heard it's gone and it might not be coming back. Coy did give me George's code, but I haven't looked at it and thought this would be fun to do from scratch while I learn how to do web programming. Either way I have a long way to go to be awesome like George. You are very welcome for the bland look. Why aren't more websites this straight to the point?
+<h2>Known Bugs</h2>
+<ul>
+    <li>Match order is broken so results will not be accurate if you play more than 5 games</li>
+    <li>I haven't split up rounds yet</li>
+    <li>I'm very bad at web programming</li>
+</ul>
+<h2>Features not yet implemented</h2>
+<ul>
+    <li>No way to put input matches (or anything really). I just manually put them in myself. I wanted to get reporting up first.</li>
+    <li>No login featuers</li>
+    <li>No verification of other people reporting matches by webform or email links.</li>
+</ul>
+<h2>Seasons</h2>
+<ul>
+{% for season in season_list %}
+    <li><a href="/leaguematches/season/{{ season.id }}/">{{ season }}</a></li>
+{% empty %}
     <p>No seasons are available.</p>
-{% endif %}
+{% endfor %}
+</ul>

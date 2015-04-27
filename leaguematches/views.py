@@ -1,6 +1,8 @@
 from django.shortcuts import render
 from django.db.models import Q
 
+from operator import itemgetter
+
 from .models import Season
 from .models import Player
 from .models import MatchReport
@@ -32,7 +34,7 @@ def season(request, season_id):
     for player in _results:
         results += {'player':player, 'wins': _results[player]['wins'], 'losses': _results[player]['losses'],
                     'main_points': _results[player]['main_points'], 'tb_points': _results[player]['tb_points']},
-    final_results = sorted(results, key=lambda k: k['main_points'], reverse=True)
+    final_results = sorted(results, key=itemgetter('main_points', 'tb_points', 'wins'), reverse=True)
 
     context = {'season': Season.objects.get(id=season_id),
                'players': Player.objects.filter(seasons=season_id),
