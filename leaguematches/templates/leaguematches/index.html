@@ -1,0 +1,10 @@
+<h1>Seasons</h1>
+{% if season_list %}
+    <ul>
+    {% for season in season_list %}
+        <li><a href="/leaguematches/season/{{ season.id }}/">{{ season }}</a></li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No seasons are available.</p>
+{% endif %}

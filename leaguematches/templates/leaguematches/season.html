@@ -1,0 +1,19 @@
+<h1>{{ season }}</h1>
+<h2>Players</h2>
+<ol>
+{% for result in results %}
+    <li><a href="/leaguematches/player/{{result.player.id}}/">{{ result.player }}</a>
+         ({{result.wins}}-{{result.losses}} MP:{{result.main_points}} TB:{{result.tb_points}} )</li>
+{% empty %}
+    <p>No players for this season.</p>
+{% endfor %}
+</ol>
+
+<h2>Matches</h2>
+<ul>
+{% for match in matches %}
+    <li>{{ match }}</li>
+{% empty %}
+    <p>No matches for this season.</p>
+{% endfor %}
+</ul>
