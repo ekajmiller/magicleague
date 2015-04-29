@@ -1,0 +1,25 @@
+from leaguematches.models import Season
+from leaguematches.models import MatchOrder
+from leaguematches.models import Player
+from leaguematches.models import MatchReport
+from django.db.models import Q
+from django.db.models import Max, Min
+
+# Populate order table for a season
+season_id = 1
+minround = MatchReport.objects.filter(season_id=1).aggregate(Min('round'))['round__min']
+maxround = MatchReport.objects.filter(season_id=1).aggregate(Max('round'))['round__max']
+for player in Player.objects.all():
+  print player
+  matches = MatchReport.objects.filter(season_id=season_id).filter(Q(reporter=player.id)|Q(opponent=player.id))
+  for round in xrange(minround, maxround+1):
+    order = MatchOrder.objects.filter(player=player,match__round=round).count() + 1
+    print round, order
+    for match in matches.filter(round=round):
+      # if match for this player not already in order table, add it
+      if MatchOrder.objects.filter(player=player,match=match).count() == 0:
+        print 'Order ' + str(order) + ': ' + str(match)
+        mo = MatchOrder(player=player, match=match, order=order)
+        order += 1
+        #mo.save()
+  print ''

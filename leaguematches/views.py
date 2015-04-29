@@ -6,6 +6,8 @@ from operator import itemgetter
 from .models import Season
 from .models import Player
 from .models import MatchReport
+from .models import MatchOrder
+
 
 def season(request, season_id):
     matches = MatchReport.objects.filter(season__id=season_id)
@@ -43,10 +45,16 @@ def season(request, season_id):
     return render(request, 'leaguematches/season.html', context)
 
 def player(request, player_id):
-    player_matches=MatchReport.objects.filter(Q(reporter=player_id)|Q(opponent=player_id))
+    #[ [season1, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
+    player_matches = MatchOrder.objects.filter(player=player_id)
     view_matches = []
     for season in Season.objects.filter(player=player_id):
-        view_matches += {'season': season, 'matches': player_matches.filter(season=season.id)},
+        season_matches = player_matches.filter(match__season=season.id)
+        round_matches = []
+        for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
+            round_matches += [round, season_matches.filter(match__round=round).order_by('order')],
+        view_matches += [season, round_matches],
+
     context = {'player': Player.objects.get(id=player_id),
                'matches': view_matches,}
     return render(request, 'leaguematches/player.html', context)

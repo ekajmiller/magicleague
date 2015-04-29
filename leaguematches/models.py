@@ -45,10 +45,21 @@ class MatchReport(models.Model):
         return self.reporter if not self.win else self.opponent
 
     def __unicode__(self):
-        return self.played_date.strftime("%Y-%m-%d") + ' Round ' + \
-               str(self.round) + ': ' + str(self.victor()) + ' beat ' + \
-               str(self.loser())
+        return self.played_date.strftime("%Y-%m-%d") + ': ' + \
+               str(self.victor()) + ' beat ' + str(self.loser())
 
     class Meta:
         ordering = ['round', 'played_date', 'report_date']
         unique_together = ('played_date', 'reporter', 'opponent')
+
+class MatchOrder(models.Model):
+    player = models.ForeignKey(Player)
+    match = models.ForeignKey(MatchReport)
+    order = models.IntegerField()
+
+    def __unicode__(self):
+        return str(self.match)
+
+    class Meta:
+        unique_together = ('player', 'match')
+    

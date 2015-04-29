@@ -2,15 +2,16 @@
 {#<h2>{{ player.email }}</h2>#}
 <h2><a href="/leaguematches/">Seasons</a></h2>
 <ul>
-{% for season_matches in matches %}
-    <li><a href="/leaguematches/season/{{season_matches.season.id}}/">{{ season_matches.season }}</a></li>
+{% for season, rounds in matches %}
+    <li><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></li>
     <ul>
-        {% for match in season_matches.matches %}
+        {% for round, matches in rounds %}
+            <li>Round {{ round }}</li>
             <ul>
-                <li>{{ match }} </li>
+                {% for match in matches %}
+                    <li>{{ match }}</li>
+                {% endfor %}
             </ul>
-        {% empty %}
-            <p>No match
         {% endfor %}
     </ul>
 {% empty %}
