@@ -5,7 +5,7 @@ urlpatterns_prod = [
     url(r'', include('leaguematches.urls')),
 ]
 
-urlpatterns_Dev = [
+urlpatterns_dev = [
     # Examples:
     # url(r'^$', 'magicleague.views.home', name='home'),
     url(r'^leaguematches/', include('leaguematches.urls')),
