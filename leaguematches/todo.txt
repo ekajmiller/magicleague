@@ -1,6 +1,5 @@
 TODO:
 
-o Ordering Table
-o Per round counting
+o Ordering buttons
 o Forms
 o Emails?

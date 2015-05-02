@@ -1,20 +1,22 @@
 <h1>{{ player }}</h1>
 {#<h2>{{ player.email }}</h2>#}
 <h2><a href="/leaguematches/">Seasons</a></h2>
-<ul>
 {% for season, rounds in matches %}
-    <li><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></li>
-    <ul>
-        {% for round, matches in rounds %}
-            <li>Round {{ round }}</li>
-            <ul>
-                {% for match in matches %}
-                    <li>{{ match }}</li>
-                {% endfor %}
-            </ul>
-        {% endfor %}
-    </ul>
+    <h3><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></h3>
+    {% for round, matches in rounds %}
+        <h4>Round {{ round }}</h4>
+        <table>
+            {% for match in matches %}
+                <tr>
+                    <td>{{ match }}</td>
+                    {% comment %}
+                    <td>{% if forloop.counter != 1 %}<button>Up</button>{% endif %}</td>
+                    <td>{% if forloop.revcounter != 1 %}<button>Down</button>{% endif %}</td>
+                    {% endcomment %}
+                </tr>
+            {% endfor %}
+        <table/>
+    {% endfor %}
 {% empty %}
     <p>No seasons for this player.</p>
 {% endfor %}
-</ul>
