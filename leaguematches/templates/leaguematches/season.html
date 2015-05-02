@@ -1,14 +1,24 @@
 <h1>{{ season }} <a href="/leaguematches/">Season</a></h1>
-<h2>Rank</h2>
+
+<h2>Total</h2>
 <ol>
-{% for result in results %}
-    <li><a href="/leaguematches/player/{{result.player.id}}/">{{ result.player }}</a>
-         ({{result.wins}}-{{result.losses}} MP:{{result.main_points}} TBP:{{result.tb_points}} )</li>
-{% empty %}
-    <p>No players for this season.</p>
+{% for p_res in total_results %}
+    <li><a href="/leaguematches/player/{{p_res.player.id}}/">{{ p_res.player }}</a>
+         ({{p_res.main_wins}}-{{p_res.main_losses}} MP:{{p_res.main_pts}} TBP:{{p_res.tb_pts}} )</li>
 {% endfor %}
 </ol>
 
+{% for round, round_res in results %}
+    <h2>Round {{ round }}</h2>
+    <ol>
+    {% for p_res in round_res %}
+        <li><a href="/leaguematches/player/{{p_res.player.id}}/">{{ p_res.player }}</a>
+             ({{p_res.main_wins}}-{{p_res.main_losses}} MP:{{p_res.main_pts}} TBP:{{p_res.tb_pts}} )</li>
+    {% endfor %}
+    </ol>
+{% endfor %}
+
+{% comment %}
 <h2>Matches</h2>
 <ul>
 {% for match in matches %}
@@ -17,3 +27,4 @@
     <p>No matches for this season.</p>
 {% endfor %}
 </ul>
+{% endcomment %}
