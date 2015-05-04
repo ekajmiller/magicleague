@@ -31,7 +31,7 @@ def season(request, season_id):
             main_losses = 0
             main_pts = 0
             for match in mains:
-                if match.match.victor().id == player_id:
+                if match.match.winner.id == player_id:
                     main_wins += 1
                     main_pts += 3
                 else:
@@ -42,7 +42,7 @@ def season(request, season_id):
             tb_losses = 0
             tb_pts = 0
             for match in tbs:
-                if match.match.victor().id == player_id:
+                if match.match.winner.id == player_id:
                     tb_wins += 1
                     tb_pts += 3
                 else:
@@ -51,8 +51,8 @@ def season(request, season_id):
                         tb_pts -= 1
             player = Player.objects.get(pk=player_id)
             p_res += {'player': player,
-                      'player_ln': player.last_name,
-                      'player_fn': player.first_name,
+                      'player_ln': player.user.last_name,
+                      'player_fn': player.user.first_name,
                       'main_wins': main_wins, 'main_losses': main_losses,
                       'tb_wins': tb_wins, 'tb_losses': tb_losses,
                       'main_pts': main_pts, 'tb_pts': tb_pts},
@@ -74,8 +74,8 @@ def season(request, season_id):
     for player_id in players:
         player = Player.objects.get(pk=player_id)
         total_results+= {'player': player,
-                         'player_ln': player.last_name,
-                         'player_fn': player.first_name,
+                         'player_ln': player.user.last_name,
+                         'player_fn': player.user.first_name,
                          'main_wins': 0, 'main_losses': 0,
                          'tb_wins': 0, 'tb_losses': 0,
                          'main_pts': 0, 'tb_pts': 0},

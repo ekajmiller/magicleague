@@ -1,5 +1,5 @@
-<h1>{{ player }}</h1>
-{#<h2>{{ player.email }}</h2>#}
+<h1>{{ player }} ({{ player.user }})</h1>
+{#<h2>{{ player.user.email }}</h2>#}
 <h2><a href="/leaguematches/">Seasons</a></h2>
 {% for season, rounds in matches %}
     <h3><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></h3>

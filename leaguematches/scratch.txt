@@ -5,6 +5,8 @@ from leaguematches.models import MatchReport
 from django.db.models import Q
 from django.db.models import Max, Min
 from operator import itemgetter
+from django.contrib.auth.models import User
+from datetime import *
 
 # Populate order table for a season
 season_id = 1
@@ -25,57 +27,91 @@ for player in Player.objects.all():
         #mo.save()
   print ''
 
-# [round1, [{'player':player 'main_wins': %d, 'main_losses': %d, 'tb_wins': %d, 'tb_losses': %d, 'main_pts': %d, 'tb_pts': %d}, ...],
-#  round2, [...]]
-season_matches = MatchOrder.objects.filter(match__season_id=1)
-players = season_matches.distinct('player').values_list('player', flat=True)
-results = []
-for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
-    p_res = []
-    for player_id in players:
-        # Get first 5 matches of the player for mains
-        round_matches = season_matches.filter(player__id=player_id, match__round=round).order_by('order')
-        mains = round_matches[0:5]
-        # The rest are tiebreaker matches
-        tbs = round_matches[5:]
-        # 3 points for win and 1 point for a loss
-        main_wins = 0
-        main_losses = 0
-        main_pts = 0
-        for match in mains:
-            if match.match.victor().id == player_id:
-                main_wins += 1
-                main_pts += 3
-            else:
-                main_losses += 1
-                main_pts += 1
-        # 3 points for a win and -1 for a loss (can't go below 0)
-        tb_wins = 0
-        tb_losses = 0
-        tb_pts = 0
-        for match in tbs:
-            if match.match.victor().id == player_id:
-                tb_wins += 1
-                tb_pts += 3
-            else:
-                tb_losses += 1
-                if (tb_pts > 0):
-                    tb_pts -= 1
-        player = Player.objects.get(pk=player_id)
-        p_res += {'player_ln': player.last_name,
-                  'player_fn': player.first_name,
-                  'main_wins': main_wins, 'main_losses': main_losses,
-                  'tb_wins': tb_wins, 'tb_losses': tb_losses,
-                  'main_pts': main_pts, 'tb_pts': tb_pts},
-    p_res = sorted(p_res, key=itemgetter('player_ln', 'player_fn'))
-    p_res = sorted(p_res, key=itemgetter('main_pts', 'tb_pts'), reverse=True)
-    results += [round, p_res],
 
-for round, round_res in results:
-    print round
-    for p_res in round_res:
-        print '%s %s (mains %d-%d tbs %d-%d): mp=%d tbp=%d)' % \
-               (p_res['player_fn'], p_res['player_ln'],
-                p_res['main_wins'], p_res['main_losses'],
-                p_res['tb_wins'], p_res['tb_losses'],
-                p_res['main_pts'], p_res['tb_pts'])
+  def addIfNotExist(name, season=None):
+    first_name, last_name = name.split()
+    player_lst=Player.objects.filter(user__first_name=first_name, user__last_name=last_name)
+    if player_lst.count() != 0:
+        return player_lst[0]
+    user_lst=User.objects.filter(first_name=first_name, last_name=last_name)
+    if user_lst.count() != 0:
+        return
+    username=first_name.lower() + last_name.lower()
+    email=username + '@gottachangeme.no_reply'
+    print 'add user ' + username + ' ' + email + ' ' + first_name + ' ' + last_name
+    new_user = User.objects.create_user(username, email, '1234')
+    new_user.first_name = first_name
+    new_user.last_name = last_name
+    new_user.save()
+    if season is not None:
+        season = Season.objects.get(name="Khans of Tarkir")
+    player = Player(user=new_user)
+    player.save()
+    if season is not None:
+        print season
+        player.seasons.add(season)
+    player.save()
+    return player
+
+# Reset from scratch
+# Import matches
+season_name='Khans of Tarkir'
+season = None
+try:
+    season = Season.objects.get(name=season_name)
+except:
+    season = Season(name='Khans of Tarkir')
+    season.save()
+
+fd = open("../import.txt")
+lines = fd.readlines()
+for line in lines:
+    name_translation = {'Adam': 'Adam Chunn',
+                        'Josh': 'Josh Sabio',
+                        'Alex': 'Alex Fuxa',
+                        'Brian': 'Brian Shoemaker',
+                        'JakeK': 'Jake Kastelic',
+                        'Jacob': 'Jacob Smalts',
+                        'JakeM': 'Jake Miller',
+                        'Philip': 'Philip Kelleher',
+                        'John': 'John Harris',
+                        'Ken': 'Ken Scianna',
+                        'Kevin': 'Kevin Nygaard',
+                        'Joe': 'Joe Wanja',}
+    # Parse info
+    lst = line.strip().split()
+    reporter = name_translation[lst[0]]
+    round = int(lst[3])
+    played_date = datetime.strptime(lst[4] + "/2015", '%m/%d/%Y')
+    winner = name_translation[lst[5]]
+    loser = name_translation[lst[7]]
+    # Check that winner and loser exist as players and if not add them
+    player_reporter=addIfNotExist(reporter, 'Khans of Tarkir')
+    player_winner=addIfNotExist(winner, 'Khans of Tarkir')
+    player_loser=addIfNotExist(loser, 'Khans of Tarkir')
+    player_opponent = player_winner if player_loser == player_reporter else player_loser
+    win = player_winner == player_reporter
+    if player_reporter not in [player_winner, player_loser]:
+        raise Exception('NOOOOO')
+    # Check for dup match and if so, mark verified; if already print warn
+    match = None
+    try:
+        match = MatchReport.objects.get(winner=player_winner,loser=player_loser,played_date=played_date, round=round, season=season)
+    except:
+        match = MatchReport(reporter=player_reporter,
+                            opponent=player_opponent,
+                            winner=player_winner,
+                            loser=player_loser,
+                            round=round,
+                            season=season,
+                            report_date=datetime.now(),
+                            played_date=played_date,
+                            win=win,
+                            verified=False)
+        match.save()
+    else:
+        if match.verified:
+            print 'DOUBLE REPORTING!!!!!: ' + str(match)
+        else:
+            match.verified=True
+            match.save()
