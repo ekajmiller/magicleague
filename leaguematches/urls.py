@@ -9,4 +9,5 @@ urlpatterns = [
     url(r'^season/(?P<season_id>[0-9]+)/$', views.season, name='season'),
     # ex: /leaguematches/player/5/
     url(r'^player/(?P<player_id>[0-9]+)/$', views.player, name='player'),
+    url(r'^profile/$', views.profile, name='profile'),
 ]

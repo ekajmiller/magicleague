@@ -28,7 +28,7 @@ for player in Player.objects.all():
   print ''
 
 
-  def addIfNotExist(name, season=None):
+def addIfNotExist(name, season=None):
     first_name, last_name = name.split()
     player_lst=Player.objects.filter(user__first_name=first_name, user__last_name=last_name)
     if player_lst.count() != 0:

@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+{% if not user.is_authenticated %}
+    No user authenticated.
+{% else %}
+
+{% if error_message %}<p><strong><font color=red>{{ error_message }}</font></strong></p>{% endif %}
+
+<h1>{{ user.player }} ({{ user.player.user }})</h1>
+
+<form action="/leaguematches/profile/" method="post">
+    {% csrf_token %}
+    <table>{{ form.as_table }}</table>
+    <input type="submit" value="Update" />
+</form>
+
+{% endif %}
+
+{% endblock content %}

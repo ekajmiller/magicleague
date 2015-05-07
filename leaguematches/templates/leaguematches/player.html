@@ -1,6 +1,15 @@
+{% extends "base.html" %}
+
+{% block content %}
+
 <h1>{{ player }} ({{ player.user }})</h1>
-{#<h2>{{ player.user.email }}</h2>#}
-<h2><a href="/leaguematches/">Seasons</a></h2>
+{% if user.is_authenticated %}
+    <h2>{{ player.user.email }}</h2>
+    {% if user.player.id == player.id %}
+        <h3><a href="/leaguematches/profile/">Edit your profile</a></h3>
+    {% endif %}
+{% endif %}
+<h2>Seasons</h2>
 {% for season, rounds in matches %}
     <h3><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></h3>
     {% for round, matches in rounds %}
@@ -20,3 +29,5 @@
 {% empty %}
     <p>No seasons for this player.</p>
 {% endfor %}
+
+{% endblock content %}

@@ -34,13 +34,13 @@ SESSION_COOKIE_SECURE = True
 # Application definition
 
 INSTALLED_APPS = (
+    'leaguematches',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'leaguematches',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -59,7 +59,7 @@ ROOT_URLCONF = 'magicleague.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': ['leaguematches/templates/leaguematches'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,3 +109,5 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
 STATIC_URL = '/static/'
+
+LOGIN_REDIRECT_URL = "/leaguematches/"

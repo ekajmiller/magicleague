@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<style type="text/css">
+.body {
+    padding:0;
+    margin:0;
+}
+.div {
+    padding:0;
+    margin:0;
+}
+.alignleft {
+    padding:0;
+    padding-left:10px;
+    margin:0;
+    float:left;
+}
+.alignright {
+    padding:0;
+    padding-right:10px;
+    margin:0;
+    float:right;
+}
+.topbar {
+    position:absolute;
+    left:0; right:0; top:0;
+    height: 20px;
+    background: lightblue;
+    font-weight: bold;
+}
+.sidebar {
+    padding-left:10px;
+    position:absolute;
+    left:0; top:20px; bottom: 0;
+    width: 150px;
+}
+.content {
+    position:absolute;
+    top:20px;
+}
+</style>
+    {# <link rel="stylesheet" href="style.css" /> #}
+    <title>{% block title %}Magic McDillerton{% endblock %}</title>
+</head>
+
+<body>
+    <div class="topbar">
+        {% block topbar %}
+        <p class="alignleft"><a href="/leaguematches/">Magic McDillerton</a></p>
+        {% if user.is_authenticated %}
+            <p class="alignright">Hi <a href="/leaguematches/player/{{user.player.id}}">{{user.first_name}}</a>. <a href="/leaguematches/logout/">Logout</a></p>
+        {% else %}
+            <p class="alignright"><a href="/leaguematches/login/">Login</a></p>
+        {% endif %}
+        {% endblock %}
+    </div>
+    <div class="content">
+        {% block content %}Nothing here.{% endblock %}
+    </div>
+</body>
+</html>

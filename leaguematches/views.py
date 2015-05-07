@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.db.models import Q
+from django.contrib.auth import update_session_auth_hash
 
 from operator import itemgetter
 
@@ -8,7 +9,12 @@ from .models import Player
 from .models import MatchReport
 from .models import MatchOrder
 
+from .forms import ProfileForm
 
+from django.contrib.auth.decorators import login_required
+
+
+@login_required(login_url='login')
 def season(request, season_id):
     # [round1, [{'player':player 'main_wins': %d, 'main_losses': %d, 'tb_wins': %d, 'tb_losses': %d, 'main_pts': %d, 'tb_pts': %d}, ...],
     #  round2, [...]]
@@ -95,6 +101,7 @@ def season(request, season_id):
                'total_results': total_results}
     return render(request, 'leaguematches/season.html', context)
 
+@login_required(login_url='login')
 def player(request, player_id):
     #[ [season1, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
     player_matches = MatchOrder.objects.filter(player=player_id)
@@ -114,3 +121,35 @@ def index(request):
     season_list = Season.objects.all();
     context = {'season_list': season_list}
     return render(request, 'leaguematches/index.html', context)
+
+@login_required(login_url='login')
+def profile(request):
+    if request.method == 'POST':
+        form = ProfileForm(request.POST)
+        if form.is_valid():
+            password_changed = False
+            if form.cleaned_data['new_password'] != "" or form.cleaned_data['confirm_password'] != "":
+                if form.cleaned_data['new_password'] == form.cleaned_data['confirm_password']:
+                    password_changed = True
+                    request.user.set_password(form.cleaned_data['new_password'])
+                else:
+                    return render(request, 'leaguematches/profile.html', {'form': form, 'error_message': "Passwords don't match"})
+            if request.user.username != form.cleaned_data['username']:
+                request.user.username = form.cleaned_data['username']
+            if request.user.email != form.cleaned_data['email']:
+                request.user.email = form.cleaned_data['email']
+            if request.user.first_name != form.cleaned_data['first_name']:
+                request.user.first_name = form.cleaned_data['first_name']
+            if request.user.last_name != form.cleaned_data['last_name']:
+                request.user.last_name = form.cleaned_data['last_name']
+            request.user.save()
+            if password_changed:
+                update_session_auth_hash(request, request.user)
+            return redirect('/leaguematches/player/' + str(request.user.id))
+    else:
+        form = ProfileForm(initial={'username': request.user.username,
+                                    'email': request.user.email,
+                                    'first_name': request.user.first_name,
+                                    'last_name': request.user.last_name})
+
+    return render(request, 'leaguematches/profile.html', {'form': form})

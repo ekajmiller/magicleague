@@ -1,18 +1,21 @@
+{% extends "base.html" %}
+
+{% block content %}
 <h1>Welcome to Magic McDillerton</h1>
 Browse around if you don't belong here. If you do, then this will give you a nice report of what's going on in our magic league!
 <h2>Recent News</h2>
 <ul>
-    <li>All basic read reporting features implemented including rankings per round and total rankings!</li>
-    <li>Next up is getting the login features working. Then I can go on to allow people to input matches.</li>
+    <li>Login features are now working! You can login and change your profile information.</li>
+    <li>Next up is match reordering forms and new match input.</li>
 </ul>
 <h2>Known Bugs</h2>
 <ul>
-    <li>I'm still bad at web programming, but there's light here.</li>
+    <li>I'm less bad at web programming.</li>
 </ul>
 <h2>Features not yet implemented</h2>
 <ul>
-    <li>No login features</li>
-    <li>No way to input matches (or anything really). I just manually put them in myself. I wanted to get reporting up first.</li>
+    <li>Ordering forms</li>
+    <li>No way to input matches. I just manually put them in myself.</li>
     <li>Strength of schedule!</li>
     <li>No verification of other people reporting matches by webform or email links.</li>
     <li>Blog my progress or release notes would be helpful</li>
@@ -25,3 +28,5 @@ Browse around if you don't belong here. If you do, then this will give you a nic
     <p>No seasons are available.</p>
 {% endfor %}
 </ul>
+
+{% endblock %}

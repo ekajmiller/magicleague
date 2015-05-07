@@ -1,4 +1,8 @@
-<h1>{{ season }} <a href="/leaguematches/">Season</a></h1>
+{% extends "base.html" %}
+
+{% block content %}
+
+<h1>{{ season }}</h1>
 
 <h2>Total</h2>
 <table cellpadding=2>
@@ -56,3 +60,5 @@
 {% endfor %}
 </ul>
 {% endcomment %}
+
+{% endblock content %}
