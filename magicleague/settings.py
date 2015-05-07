@@ -24,7 +24,7 @@ with open('/etc/secret_key.txt') as f:
     SECRET_KEY = f.read().strip()
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['vsnake', '.mcdillers.com']
 
@@ -59,7 +59,8 @@ ROOT_URLCONF = 'magicleague.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['leaguematches/templates/leaguematches'],
+        #TODO: Why absolute path here?
+        'DIRS': ['/share/webapps/magicleague/leaguematches/templates/leaguematches'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
