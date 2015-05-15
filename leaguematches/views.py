@@ -201,7 +201,9 @@ def player(request, player_id):
         for season in Season.objects.filter(player=player_id):
             season_matches = player_matches.filter(match__season=season.id)
             round_matches = []
-            for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
+            #for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
+            #FIXME: Don't hardcode number of rounds
+            for round in [1,2,3,4]:
                 round_matches += [round, season_matches.filter(match__round=round).order_by('order')],
             view_matches += [season, round_matches],
 
