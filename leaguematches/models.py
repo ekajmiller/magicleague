@@ -14,26 +14,6 @@ class Player(models.Model):
     def __unicode__(self):
         return self.user.get_full_name()
 
-#class Player(models.Model):
-#    user = models.OneToOneField(User)
-#    email = models.EmailField(unique=True)
-#    first_name = models.CharField(max_length=50)
-#    last_name = models.CharField(max_length=50)
-#
-#    seasons = models.ManyToManyField(Season, blank=True)
-#
-#    def get_full_name(self):
-#        return self.first_name + ' ' + self.last_name
-#
-#    def get_short_name(self):
-#        return self.first_name
-#
-#    def __unicode__(self):
-#        return self.get_full_name()
-#
-#    class Meta:
-#        ordering = ['first_name', 'last_name']
-
 class MatchReport(models.Model):
     reporter = models.ForeignKey(Player, related_name='+')
     opponent = models.ForeignKey(Player, related_name='+')

@@ -2,7 +2,17 @@
 
 {% block content %}
 
-<h1>{{ player }} ({{ player.user }})</h1>
+{% if messages %}
+<p><strong><font color=red>
+<ul class="messages">
+    {% for message in messages %}
+    <li>{{ message }}</li>
+    {% endfor %}
+</ul>
+</font></strong></p>
+{% endif %}
+
+<h1>{{ player }}</h1>
 {% if user.is_authenticated %}
     <h2>{{ player.user.email }}</h2>
     {% if user.player.id == player.id %}
@@ -10,24 +20,61 @@
     {% endif %}
 {% endif %}
 <h2>Seasons</h2>
-{% for season, rounds in matches %}
-    <h3><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></h3>
-    {% for round, matches in rounds %}
-        <h4>Round {{ round }}</h4>
-        <table>
-            {% for match in matches %}
-                <tr>
-                    <td>{{ match }}</td>
-                    {% comment %}
-                    <td>{% if forloop.counter != 1 %}<button>Up</button>{% endif %}</td>
-                    <td>{% if forloop.revcounter != 1 %}<button>Down</button>{% endif %}</td>
-                    {% endcomment %}
-                </tr>
-            {% endfor %}
-        <table/>
+<form action="/leaguematches/player/{{player.id}}/" method="post">
+    {% csrf_token %}
+    {% for season, rounds in matches %}
+        <h3><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></h3>
+        {% for round, matches in rounds reversed %}
+            <h4>Round {{ round }}</h4>
+            <table>
+                {% for match in matches %}
+                    <tr>
+                        {% if user.player.id == player.id or request.user.is_superuser %}
+                            <td>{% if forloop.counter != 1 %}<input type="submit" name="up_{{match.id}}" value="&uarr;"/>{% endif %}</td>
+                            <td>{% if forloop.revcounter != 1 %}<input type="submit" name="down_{{match.id}}" value="&darr;"/>{% endif %}</td>
+                            <td colspan=2>{{ match }}</td>
+                            <td>
+                            {% if not match.match.verified %}
+                                {% if match.match.reporter == player %}
+                                    <input type="submit" name="remove_{{match.id}}" value="Remove"/>
+                                {% else %}
+                                    <input type="submit" name="verify_{{match.id}}" value="Verify"/>
+                                {% endif %}
+                            {% else %}
+                                {% if match.match.reporter == player %}
+                                    {#<font color=green>&#x2714;</font>#}
+                                {% else %}
+                                    {#<input type="submit" name="unverify_{{match.id}}" value="Unverify"/>#}
+                                {% endif %}
+                            {% endif %}
+                            </td>
+                        {% else %}
+                            <td>{{ match }}</td>
+                        {% endif %}
+                            <td><hidden value="{{match.order}}"/></td>
+                    </tr>
+                {% endfor %}
+                {% if user.player.id == player.id or request.user.is_superuser %}
+                    <tr>
+                        <td colspan=2><b>NEW</b></td>
+                        <td><input type="date" name="new_{{season.id}}_{{round}}_playdate"/></td>
+                        <td>
+                            <select name="new_{{season.id}}_{{round}}_opponent">
+                            <option value="-1"></option>
+                            {% for opponent in opponents %}
+                                <option value="{{opponent.id}}">{{opponent}}</option>
+                            {% endfor %}
+                            </select>
+                        </td>
+                        <td><input type="checkbox" name="new_{{season.id}}_{{round}}_result" value="Won">Won</input></td>
+                        <td><input type="submit" name="new_{{season.id}}_{{round}}" value="Add"/></td>
+                    </tr>
+                {% endif %}
+            <table/>
+        {% endfor %}
+    {% empty %}
+        <p>No seasons for this player.</p>
     {% endfor %}
-{% empty %}
-    <p>No seasons for this player.</p>
-{% endfor %}
+</form>
 
 {% endblock content %}

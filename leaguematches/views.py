@@ -12,6 +12,39 @@ from .models import MatchOrder
 from .forms import ProfileForm
 
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+
+from datetime import *
+
+def addMatch(player_id, opponent_id, season_id, round, date_str, won):
+    # Get objects; plus this double checks everything exists and in correct format
+    reporter = Player.objects.get(pk=player_id)
+    opponent = Player.objects.get(pk=opponent_id)
+    season = Season.objects.get(pk=season_id, player=player_id)
+    date = datetime.strptime(date_str, '%Y-%m-%d')
+    winner = reporter if won else opponent
+    loser = reporter if not won else opponent
+
+    # First add match
+    match = MatchReport(reporter=reporter,
+                        opponent=opponent,
+                        winner=winner,
+                        loser=loser,
+                        round=round,
+                        season=season,
+                        report_date=datetime.now(),
+                        played_date=date,
+                        win=won,
+                        verified=False)
+    match.save()
+
+    # Now add order matches, one for each player
+    reporter_order = MatchOrder.objects.filter(player=reporter,match__round=round).count() + 1
+    opponent_order = MatchOrder.objects.filter(player=opponent,match__round=round).count() + 1
+    reporter_mo = MatchOrder(player=reporter, match=match, order=reporter_order)
+    opponent_mo = MatchOrder(player=opponent, match=match, order=opponent_order)
+    reporter_mo.save()
+    opponent_mo.save()
 
 
 @login_required(login_url='login')
@@ -66,15 +99,6 @@ def season(request, season_id):
         p_res = sorted(p_res, key=itemgetter('main_pts', 'tb_pts'), reverse=True)
         results += [round, p_res],
 
-#    for round, round_res in results:
-#        print round
-#        for p_res in round_res:
-#            print '%s %s (mains %d-%d tbs %d-%d): mp=%d tbp=%d)' % \
-#                   (p_res['player_fn'], p_res['player_ln'],
-#                    p_res['main_wins'], p_res['main_losses'],
-#                    p_res['tb_wins'], p_res['tb_losses'],
-#                    p_res['main_pts'], p_res['tb_pts'])
-
     # Get total results by adding up the rounds
     total_results = []
     for player_id in players:
@@ -103,19 +127,89 @@ def season(request, season_id):
 
 @login_required(login_url='login')
 def player(request, player_id):
-    #[ [season1, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
-    player_matches = MatchOrder.objects.filter(player=player_id)
-    view_matches = []
-    for season in Season.objects.filter(player=player_id):
-        season_matches = player_matches.filter(match__season=season.id)
-        round_matches = []
-        for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
-            round_matches += [round, season_matches.filter(match__round=round).order_by('order')],
-        view_matches += [season, round_matches],
+    if request.method == 'POST':
+        errmsg = None
+        if request.user.player.id == int(player_id) or request.user.is_superuser:
+            for field in request.POST:
+                vals = field.split("_")
+                if len(vals) == 2:
+                    cmd, oid = vals
+                    if cmd in ['up', 'down', 'remove', 'verify', 'new']:
+                        orderMatch = MatchOrder.objects.get(pk=oid)
+                        player = orderMatch.player
+                        if cmd in ['up', 'down']:
+                            switchmatchorder = orderMatch.order - 1 if cmd == 'up' else orderMatch.order + 1
+                            switchmatches = MatchOrder.objects.filter(match__season=orderMatch.match.season,
+                                                                      match__round=orderMatch.match.round,
+                                                                      player=player,
+                                                                      order=switchmatchorder)
+                            if switchmatches.count() != 1:
+                                break
+                            switchmatch = switchmatches[0]
+                            tmp = switchmatch.order
+                            switchmatch.order = orderMatch.order
+                            orderMatch.order = tmp
+                            switchmatch.save()
+                            orderMatch.save()
+                        elif cmd == 'remove':
+                            if orderMatch.match.verified or orderMatch.match.reporter != player:
+                                break
+                            otherOrderMatch = MatchOrder.objects.get(match=orderMatch.match, player=orderMatch.match.opponent)
+                            match = orderMatch.match
 
-    context = {'player': Player.objects.get(id=player_id),
-               'matches': view_matches,}
-    return render(request, 'leaguematches/player.html', context)
+                            # Save info for future use of adjusting ordering
+                            otherPlayer = otherOrderMatch.player
+                            order = orderMatch.order
+                            otherOrder = otherOrderMatch.order
+                            season = orderMatch.match.season
+                            round = orderMatch.match.round
+
+                            # Remove the ordered entries and the anchor entry
+                            orderMatch.delete()
+                            otherOrderMatch.delete()
+                            match.delete()
+
+                            # Now adjust order for all matches in round after one removed
+                            for p in [player, otherPlayer]:
+                                for o in MatchOrder.objects.filter(match__season=season, match__round=round, player=p, order__gt=order).order_by('order'):
+                                    o.order-=1
+                                    o.save()
+                        elif cmd == 'verify':
+                            if orderMatch.match.verified or orderMatch.match.reporter == player:
+                                break
+                            orderMatch.match.verified = True
+                            orderMatch.match.save()
+                    break
+                elif len(vals) == 3:
+                    cmd, season_id, round = vals
+                    if cmd == 'new':
+                        date = request.POST['new_%s_%s_playdate' % (season_id, round)]
+                        opponent_id = request.POST['new_%s_%s_opponent' % (season_id, round)]
+                        won = 'new_%s_%s_result' % (season_id, round) in request.POST
+                        try:
+                            addMatch(player_id, opponent_id, season_id, round, date, won)
+                        except Exception as e:
+                            errmsg="Error in input data: " + str(e)
+                    break
+        if errmsg:
+            messages.error(request, errmsg)
+        return redirect('/leaguematches/player/' + str(player_id))
+    else:
+        #[ [season1, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
+        player_matches = MatchOrder.objects.filter(player=player_id)
+        view_matches = []
+        for season in Season.objects.filter(player=player_id):
+            season_matches = player_matches.filter(match__season=season.id)
+            round_matches = []
+            for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
+                round_matches += [round, season_matches.filter(match__round=round).order_by('order')],
+            view_matches += [season, round_matches],
+
+        opponents = Player.objects.exclude(id=player_id).order_by("user__first_name", "user__last_name")
+        context = {'player': Player.objects.get(id=player_id),
+                   'matches': view_matches,
+                   'opponents': opponents,}
+        return render(request, 'leaguematches/player.html', context)
 
 def index(request):
     season_list = Season.objects.all();
