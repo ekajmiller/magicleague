@@ -83,7 +83,7 @@ def season(request, season_id):
             for match in tbs:
                 if match.match.winner.id == player_id:
                     tb_wins += 1
-                    tb_pts += 3
+                    tb_pts += 2
                 else:
                     tb_losses += 1
                     if (tb_pts > 0):
