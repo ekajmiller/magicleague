@@ -4,6 +4,18 @@ from django.contrib.auth.models import User
 class Season(models.Model):
     name = models.CharField(max_length=50, unique=True)
 
+    # As a convenience you can't add matches for > than the current round
+    current_round = models.PositiveIntegerField(default=1)
+
+    # If closed then no more matches can be input
+    closed = models.BooleanField(default=False)
+
+    # NegTieBreakLosses: MP (first 5 matches), 3 for Win, 1 For Loss. TB, 2 for win, -1 for loss, can't go below 0 (order matters)
+    # Simple: MP (first 5 matches), 4 for Win, 2 for Loss, 1 for Tie. TB, 
+    calcmethod = models.CharField(max_length=30, choices = [('NegTieBreakLosses', "Negative Tie Breaker Points for Losses"),
+                                                           ('Simple', "Regular scoring where order of matches doesn't matter for tiebreakers")],
+                                                           default='Simple')
+    
     def __unicode__(self):
         return self.name
 
