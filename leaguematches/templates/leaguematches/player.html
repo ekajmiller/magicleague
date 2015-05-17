@@ -29,7 +29,7 @@
             <table>
                 {% for match in matches %}
                     <tr>
-                        {% if user.player.id == player.id or request.user.is_superuser %}
+                        {% if allow_edits and not season.closed %}
                             <td>{% if forloop.counter != 1 %}<input type="submit" name="up_{{match.id}}" value="&uarr;"/>{% endif %}</td>
                             <td>{% if forloop.revcounter != 1 %}<input type="submit" name="down_{{match.id}}" value="&darr;"/>{% endif %}</td>
                             <td colspan=2>{{ match }}</td>
@@ -54,7 +54,7 @@
                             <td><hidden value="{{match.order}}"/></td>
                     </tr>
                 {% endfor %}
-                {% if user.player.id == player.id or request.user.is_superuser %}
+                {% if allow_edits and not season.closed %}
                     <tr>
                         <td colspan=2><b>NEW</b></td>
                         <td><input type="date" name="new_{{season.id}}_{{round}}_playdate"/></td>

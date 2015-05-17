@@ -49,45 +49,52 @@ def addMatch(player_id, opponent_id, season_id, round, date_str, won):
 
 @login_required(login_url='login')
 def season(request, season_id):
+    season = Season.objects.get(pk=season_id)
+
     # [round1, [{'player':player 'main_wins': %d, 'main_losses': %d, 'tb_wins': %d, 'tb_losses': %d, 'main_pts': %d, 'tb_pts': %d}, ...],
     #  round2, [...]]
-    season_matches = MatchOrder.objects.filter(match__season_id=1)
+    season_matches = MatchOrder.objects.filter(match__season=season)
     players = season_matches.distinct('player').values_list('player', flat=True)
     # [round1, [{'player':player 'main_wins': %d, 'main_losses': %d, 'tb_wins': %d, 'tb_losses': %d, 'main_pts': %d, 'tb_pts': %d}, ...],
     #  round2, [...]]
     results = []
-
     for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
         p_res = []
         for player_id in players:
-            # Get first 5 matches of the player for mains
             round_matches = season_matches.filter(player__id=player_id, match__round=round).order_by('order')
+            # Get first 5 matches of the player for mains
             mains = round_matches[0:5]
             # The rest are tiebreaker matches
             tbs = round_matches[5:]
-            # 3 points for win and 1 point for a loss
             main_wins = 0
             main_losses = 0
             main_pts = 0
             for match in mains:
                 if match.match.winner.id == player_id:
                     main_wins += 1
-                    main_pts += 3
+                    if season.calcmethod == 'NegTieBreakLosses':
+                        main_pts += 3
+                    elif season.calcmethod == 'Simple':
+                        main_pts += 4
                 else:
                     main_losses += 1
                     main_pts += 1
-            # 3 points for a win and -1 for a loss (can't go below 0)
+
             tb_wins = 0
             tb_losses = 0
             tb_pts = 0
             for match in tbs:
                 if match.match.winner.id == player_id:
                     tb_wins += 1
-                    tb_pts += 2
+                    if season.calcmethod == 'NegTieBreakLosses':
+                        tb_pts += 2
+                    elif season.calcmethod == 'Simple':
+                        tb_pts += 3
                 else:
                     tb_losses += 1
-                    if (tb_pts > 0):
-                        tb_pts -= 1
+                    if season.calcmethod == 'NegTieBreakLosses':
+                        if (tb_pts > 0):
+                            tb_pts -= 1
             player = Player.objects.get(pk=player_id)
             p_res += {'player': player,
                       'player_ln': player.user.last_name,
@@ -127,9 +134,10 @@ def season(request, season_id):
 
 @login_required(login_url='login')
 def player(request, player_id):
+    allow_edits = (request.user.player.id == int(player_id) or request.user.is_superuser)
     if request.method == 'POST':
         errmsg = None
-        if request.user.player.id == int(player_id) or request.user.is_superuser:
+        if allow_edits:
             for field in request.POST:
                 vals = field.split("_")
                 if len(vals) == 2:
@@ -201,16 +209,15 @@ def player(request, player_id):
         for season in Season.objects.filter(player=player_id):
             season_matches = player_matches.filter(match__season=season.id)
             round_matches = []
-            #for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
-            #FIXME: Don't hardcode number of rounds
-            for round in [1,2,3,4]:
+            for round in xrange(1,season.current_round+1):
                 round_matches += [round, season_matches.filter(match__round=round).order_by('order')],
             view_matches += [season, round_matches],
 
         opponents = Player.objects.exclude(id=player_id).order_by("user__first_name", "user__last_name")
         context = {'player': Player.objects.get(id=player_id),
                    'matches': view_matches,
-                   'opponents': opponents,}
+                   'opponents': opponents,
+                   'allow_edits': allow_edits,}
         return render(request, 'leaguematches/player.html', context)
 
 def index(request):
