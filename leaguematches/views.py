@@ -50,17 +50,29 @@ def addMatch(player_id, opponent_id, season_id, round, date_str, won):
 @login_required(login_url='login')
 def season(request, season_id):
     season = Season.objects.get(pk=season_id)
-
-    # [round1, [{'player':player 'main_wins': %d, 'main_losses': %d, 'tb_wins': %d, 'tb_losses': %d, 'main_pts': %d, 'tb_pts': %d}, ...],
-    #  round2, [...]]
     season_matches = MatchOrder.objects.filter(match__season=season)
     players = season_matches.distinct('player').values_list('player', flat=True)
+
+    # Initialize total results
+    total_results = []
+    for player_id in players:
+        player = Player.objects.get(pk=player_id)
+        total_results+= {'player': player,
+                         'player_ln': player.user.last_name,
+                         'player_fn': player.user.first_name,
+                         'main_wins': 0, 'main_losses': 0,
+                         'tb_wins': 0, 'tb_losses': 0,
+                         'main_pts': 0, 'tb_pts': 0},
+
     # [round1, [{'player':player 'main_wins': %d, 'main_losses': %d, 'tb_wins': %d, 'tb_losses': %d, 'main_pts': %d, 'tb_pts': %d}, ...],
     #  round2, [...]]
     results = []
     for round in season_matches.order_by('match__round').values_list('match__round',flat=True).distinct():
         p_res = []
         for player_id in players:
+            # Get ref to total result for the player so we can update total stats while we go through rounds
+            ptr = (tr for tr in total_results if tr["player"].id == player_id).next()
+
             round_matches = season_matches.filter(player__id=player_id, match__round=round).order_by('order')
             # Get first 5 matches of the player for mains
             mains = round_matches[0:5]
@@ -72,13 +84,18 @@ def season(request, season_id):
             for match in mains:
                 if match.match.winner.id == player_id:
                     main_wins += 1
+                    ptr['main_wins'] += 1
                     if season.calcmethod == 'NegTieBreakLosses':
                         main_pts += 3
+                        ptr['main_pts'] += 3
                     elif season.calcmethod == 'Simple':
                         main_pts += 4
+                        ptr['main_pts'] += 4
                 else:
                     main_losses += 1
                     main_pts += 1
+                    ptr['main_losses'] += 1
+                    ptr['main_pts'] += 1
 
             tb_wins = 0
             tb_losses = 0
@@ -86,15 +103,20 @@ def season(request, season_id):
             for match in tbs:
                 if match.match.winner.id == player_id:
                     tb_wins += 1
+                    ptr['tb_wins'] += 1
                     if season.calcmethod == 'NegTieBreakLosses':
                         tb_pts += 2
+                        ptr['tb_pts'] += 2
                     elif season.calcmethod == 'Simple':
                         tb_pts += 3
+                        ptr['tb_pts'] += 3
                 else:
                     tb_losses += 1
+                    ptr['tb_losses'] += 1
                     if season.calcmethod == 'NegTieBreakLosses':
                         if (tb_pts > 0):
                             tb_pts -= 1
+                            ptr['tb_pts'] -= 1
             player = Player.objects.get(pk=player_id)
             p_res += {'player': player,
                       'player_ln': player.user.last_name,
@@ -106,23 +128,7 @@ def season(request, season_id):
         p_res = sorted(p_res, key=itemgetter('main_pts', 'tb_pts'), reverse=True)
         results += [round, p_res],
 
-    # Get total results by adding up the rounds
-    total_results = []
-    for player_id in players:
-        player = Player.objects.get(pk=player_id)
-        total_results+= {'player': player,
-                         'player_ln': player.user.last_name,
-                         'player_fn': player.user.first_name,
-                         'main_wins': 0, 'main_losses': 0,
-                         'tb_wins': 0, 'tb_losses': 0,
-                         'main_pts': 0, 'tb_pts': 0},
-
-
-    for round, round_res in results:
-        for p_res in round_res:
-           total_p_res = [rec for rec in total_results if rec['player'] == p_res['player']][0]
-           for field in ['main_wins', 'main_losses', 'tb_wins', 'tb_losses', 'main_pts', 'tb_pts']:
-               total_p_res[field] += p_res[field]
+    # Sort the results for display
     total_results = sorted(total_results, key=itemgetter('player_ln', 'player_fn'))
     total_results = sorted(total_results, key=itemgetter('main_pts', 'tb_pts'), reverse=True)
 
