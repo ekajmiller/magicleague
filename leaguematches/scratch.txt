@@ -8,6 +8,11 @@ from operator import itemgetter
 from django.contrib.auth.models import User
 from datetime import *
 
+# Find "lazy" users
+MatchReport.objects.filter(verified=False).order_by('opponent').distinct('opponent').values_list('opponent__user__email', flat=True)
+MatchReport.objects.filter(verified=False).order_by('opponent__user__email').distinct('opponent__user__email').values_list('opponent__user__email', flat=True)
+
+
 # Populate order table for a season
 season_id = 1
 minround = MatchReport.objects.filter(season_id=1).aggregate(Min('round'))['round__min']
