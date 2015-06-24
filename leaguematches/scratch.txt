@@ -7,10 +7,21 @@ from django.db.models import Max, Min
 from operator import itemgetter
 from django.contrib.auth.models import User
 from datetime import *
+from django.core.mail import send_mail
 
+# Find latest matche
+ MatchReport.objects.order_by('-played_date', 'report_date')[0]
+ 
 # Find "lazy" users
 MatchReport.objects.filter(verified=False).order_by('opponent').distinct('opponent').values_list('opponent__user__email', flat=True)
 MatchReport.objects.filter(verified=False).order_by('opponent__user__email').distinct('opponent__user__email').values_list('opponent__user__email', flat=True)
+
+for uid in MatchReport.objects.filter(verified=False).order_by('opponent__user__email').distinct('opponent__user__email').values_list('opponent__user', flat=True):
+    user = User.objects.get(pk=uid)
+    print 'Emailing %s...' % (user.email)
+    send_mail('You need to verify your McDiller magic league matches, %s' %(user.first_name),
+        'You have unverified matches.\n\nGo to http://magic.mcdillers.com/player/%d/ to verify!\n\nThanks,\nJake' % (user.player.id),
+        'jake.e.miller@gmail.com', [user.email])
 
 
 # Populate order table for a season

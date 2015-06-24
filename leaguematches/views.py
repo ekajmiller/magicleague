@@ -132,10 +132,16 @@ def season(request, season_id):
     total_results = sorted(total_results, key=itemgetter('player_ln', 'player_fn'))
     total_results = sorted(total_results, key=itemgetter('main_pts', 'tb_pts'), reverse=True)
 
+    # Get first and last matches to display season start to season end
+    earliest_match_date = MatchReport.objects.order_by('played_date', 'report_date')[0].played_date
+    latest_match_date = MatchReport.objects.order_by('-played_date', '-report_date')[0].played_date
+
     context = {'season': Season.objects.get(id=season_id),
                'matches': MatchReport.objects.filter(season__id=season_id),
                'results': results,
-               'total_results': total_results}
+               'total_results': total_results,
+               'earliest_match_date' : str(earliest_match_date),
+               'latest_match_date' : str(latest_match_date)}
     return render(request, 'leaguematches/season.html', context)
 
 @login_required(login_url='login')

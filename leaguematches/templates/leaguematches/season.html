@@ -3,7 +3,11 @@
 {% block content %}
 
 <h1>{{ season }}</h1>
+{% if not season.closed %}
 <h2>Current Round: {{ season.current_round }}</h2>
+{% else %}
+<h2>Played from {{ earliest_match_date }} to {{ latest_match_date }}
+{% endif %}
 
 <h2>Total</h2>
 <table cellpadding=2>
