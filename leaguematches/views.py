@@ -15,12 +15,14 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 
 from datetime import *
+import time
+
 
 def addMatch(player_id, opponent_id, season_id, round, date_str, won):
     # Get objects; plus this double checks everything exists and in correct format
     reporter = Player.objects.get(pk=player_id)
     opponent = Player.objects.get(pk=opponent_id)
-    season = Season.objects.get(pk=season_id, player=player_id)
+    season = Season.objects.get(pk=season_id)
     date = datetime.strptime(date_str, '%Y-%m-%d')
     winner = reporter if won else opponent
     loser = reporter if not won else opponent
@@ -218,7 +220,7 @@ def player(request, player_id):
         #[ [season1, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
         player_matches = MatchOrder.objects.filter(player=player_id)
         view_matches = []
-        for season in Season.objects.filter(player=player_id):
+        for season in Season.objects.all():
             season_matches = player_matches.filter(match__season=season.id)
             round_matches = []
             for round in xrange(1,season.current_round+1):
@@ -229,7 +231,8 @@ def player(request, player_id):
         context = {'player': Player.objects.get(id=player_id),
                    'matches': view_matches,
                    'opponents': opponents,
-                   'allow_edits': allow_edits,}
+                   'allow_edits': allow_edits,
+				   'default_date' : time.strftime("%Y-%m-%d")}
         return render(request, 'leaguematches/player.html', context)
 
 def index(request):

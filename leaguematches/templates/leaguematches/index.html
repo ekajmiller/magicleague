@@ -19,7 +19,7 @@ Browse around if you don't belong here. If you do, then this will give you a nic
 </ul>
 <h2>Seasons</h2>
 <ul>
-{% for season in season_list %}
+{% for season in season_list reversed %}
     <li><a href="/leaguematches/season/{{ season.id }}/">{{ season }}</a></li>
 {% empty %}
     <p>No seasons are available.</p>
