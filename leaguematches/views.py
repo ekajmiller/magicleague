@@ -110,8 +110,8 @@ def season(request, season_id):
                         tb_pts += 2
                         ptr['tb_pts'] += 2
                     elif season.calcmethod == 'Simple':
-                        tb_pts += 3
-                        ptr['tb_pts'] += 3
+                        tb_pts += 1
+                        ptr['tb_pts'] += 1
                 else:
                     tb_losses += 1
                     ptr['tb_losses'] += 1
