@@ -220,7 +220,7 @@ def player(request, player_id):
         #[ [season1, opponents, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
         player_matches = MatchOrder.objects.filter(player=player_id)
         view_matches = []
-        for season in Season.objects.all():
+        for season in Season.objects.filter(player=player_id):
             season_matches = player_matches.filter(match__season=season.id)
             opponents = season.player_set.exclude(id=player_id).order_by("user__first_name", "user__last_name")
             round_matches = []
