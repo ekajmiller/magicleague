@@ -6,6 +6,8 @@ urlpatterns_prod = [
     url(r'', include('django.contrib.auth.urls'))
 ]
 
+urlpatterns_prod_admin = urlpatterns_prod + [url(r'^admin/', include(admin.site.urls)),]
+
 urlpatterns_dev = [
     # Examples:
     # url(r'^$', 'magicleague.views.home', name='home'),

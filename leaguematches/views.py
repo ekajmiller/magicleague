@@ -53,7 +53,7 @@ def addMatch(player_id, opponent_id, season_id, round, date_str, won):
 def season(request, season_id):
     season = Season.objects.get(pk=season_id)
     season_matches = MatchOrder.objects.filter(match__season=season)
-    players = season_matches.distinct('player').values_list('player', flat=True)
+    players = season.player_set.values_list('user', flat=True)
 
     # Initialize total results
     total_results = []
@@ -131,7 +131,7 @@ def season(request, season_id):
         results += [round, p_res],
 
     # Sort the results for display
-    total_results = sorted(total_results, key=itemgetter('player_ln', 'player_fn'))
+    total_results = sorted(total_results, key=itemgetter('player_fn', 'player_ln'))
     total_results = sorted(total_results, key=itemgetter('main_pts', 'tb_pts'), reverse=True)
 
     # Get first and last matches to display season start to season end
@@ -217,20 +217,19 @@ def player(request, player_id):
             messages.error(request, errmsg)
         return redirect('/leaguematches/player/' + str(player_id))
     else:
-        #[ [season1, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
+        #[ [season1, opponents, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
         player_matches = MatchOrder.objects.filter(player=player_id)
         view_matches = []
         for season in Season.objects.all():
             season_matches = player_matches.filter(match__season=season.id)
+            opponents = season.player_set.exclude(id=player_id).order_by("user__first_name", "user__last_name")
             round_matches = []
             for round in xrange(1,season.current_round+1):
                 round_matches += [round, season_matches.filter(match__round=round).order_by('order')],
-            view_matches += [season, round_matches],
+            view_matches += [season, opponents, round_matches],
 
-        opponents = Player.objects.exclude(id=player_id).order_by("user__first_name", "user__last_name")
         context = {'player': Player.objects.get(id=player_id),
                    'matches': view_matches,
-                   'opponents': opponents,
                    'allow_edits': allow_edits,
 				   'default_date' : time.strftime("%Y-%m-%d")}
         return render(request, 'leaguematches/player.html', context)

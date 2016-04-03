@@ -22,7 +22,7 @@
 <h2>Seasons</h2>
 <form action="/leaguematches/player/{{player.id}}/" method="post">
     {% csrf_token %}
-    {% for season, rounds in matches reversed %}
+    {% for season, opponents, rounds in matches reversed %}
         <h3><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></h3>
         {% for round, matches in rounds reversed %}
             <h4>Round {{ round }}</h4>
