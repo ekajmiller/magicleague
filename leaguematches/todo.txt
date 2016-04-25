@@ -1,5 +1,5 @@
 TODO:
 
-o Ordering buttons
-o Forms
-o Emails?
+o Insert into match list in date order
+o Strength of schedule
+o Auto emails?
