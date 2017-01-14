@@ -20,16 +20,16 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-with open('/etc/secret_key.txt') as f:
-    SECRET_KEY = f.read().strip()
+SECRET_KEY = '956l*8&j&!vjz&x$+ir&l35c+2kt(8xr=hosgxty+wc9tn@ya-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True 
 
-ALLOWED_HOSTS = ['vsnake', '.mcdillers.com']
+#ALLOWED_HOSTS = ['vsnake', '.mcdillers.com', '127.0.0.1']
+ALLOWED_HOSTS = []
 
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+#CSRF_COOKIE_SECURE = True
+#SESSION_COOKIE_SECURE = True
 
 # Application definition
 
@@ -60,7 +60,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         #TODO: Why absolute path here?
-        'DIRS': ['/share/webapps/magicleague/leaguematches/templates/leaguematches'],
+        'DIRS': ['/opt/python/current/app/leaguematches/templates/leaguematches'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -79,15 +79,21 @@ WSGI_APPLICATION = 'magicleague.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
-with open('/etc/pgekps.txt') as f:
-    DB_PASSWORD = f.read().strip()
+# HACK since Elastic Beanstalk don't use env variables for python?
+os.environ['RDS_PORT'] = "5432"
+os.environ['RDS_PASSWORD'] = "UBdT!hP5hYJw"
+os.environ['RDS_USERNAME'] = "ekajmiller"
+os.environ['RDS_DB_NAME'] = "magicleague"
+os.environ['RDS_HOSTNAME'] = "magicleague.cjduwx2c3jsg.us-west-2.rds.amazonaws.com"
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'magicleague',
-        'USER': 'ekajmiller',
-        'PASSWORD': DB_PASSWORD,
+        'HOST': os.environ['RDS_HOSTNAME'],
+        'PORT': os.environ['RDS_PORT'],
+        'NAME': os.environ['RDS_DB_NAME'],
+        'USER': os.environ['RDS_USERNAME'],
+        'PASSWORD': os.environ['RDS_PASSWORD'],
     }
 }
 

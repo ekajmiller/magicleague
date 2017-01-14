@@ -13,15 +13,26 @@ from django.core.mail import send_mail
  MatchReport.objects.order_by('-played_date', 'report_date')[0]
  
 # Find "lazy" users
-MatchReport.objects.filter(verified=False).order_by('opponent').distinct('opponent').values_list('opponent__user__email', flat=True)
-MatchReport.objects.filter(verified=False).order_by('opponent__user__email').distinct('opponent__user__email').values_list('opponent__user__email', flat=True)
+MatchReport.objects.filter(season__name="Scars of Mirrodin", verified=False).order_by('opponent').distinct('opponent').values_list('opponent__user__email', flat=True)
+MatchReport.objects.filter(season__name="Scars of Mirrodin", verified=False).order_by('opponent__user__email').distinct('opponent__user__email').values_list('opponent__user__email', flat=True)
 
 for uid in MatchReport.objects.filter(verified=False).order_by('opponent__user__email').distinct('opponent__user__email').values_list('opponent__user', flat=True):
     user = User.objects.get(pk=uid)
     print 'Emailing %s...' % (user.email)
-    send_mail('You need to verify your McDiller magic league matches, %s' %(user.first_name),
-        'You have unverified matches.\n\nGo to http://magic.mcdillers.com/player/%d/ to verify!\n\nThanks,\nJake' % (user.player.id),
-        'jake.e.miller@gmail.com', [user.email])
+    subj = 'You need to verify your McDiller magic league matches, %s' %(user.first_name)
+    body = 'You have unverified matches.\n\nGo to http://magic.mcdillers.com/player/%d/ to verify!\n\nThanks,\nJake' % (user.player.id)
+    reply_to = 'jake.e.miller@gmail.com'
+    send_to = user.email
+    # uncomment this line to test email to self
+    # send_to = 'jake.e.miller@gmail.com'
+    print 'Reply To: ' + reply_to 
+    print 'Send To: ' + send_to 
+    print 'Subject: ' + subj
+    print 'Body:'
+    print body
+    print
+    send_mail(subj, body, reply_to, [send_to])
+    break
 
 
 # Populate order table for a season
