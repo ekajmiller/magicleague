@@ -26,7 +26,7 @@ SECRET_KEY = '956l*8&j&!vjz&x$+ir&l35c+2kt(8xr=hosgxty+wc9tn@ya-'
 DEBUG = True 
 
 #ALLOWED_HOSTS = ['vsnake', '.mcdillers.com', '127.0.0.1']
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['.mcdillers.com']
 
 #CSRF_COOKIE_SECURE = True
 #SESSION_COOKIE_SECURE = True
@@ -59,8 +59,7 @@ ROOT_URLCONF = 'magicleague.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        #TODO: Why absolute path here?
-        'DIRS': ['/opt/python/current/app/leaguematches/templates/leaguematches'],
+        'DIRS': [os.path.join(BASE_DIR, 'leaguematches', 'templates', 'leaguematches')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -78,13 +77,6 @@ WSGI_APPLICATION = 'magicleague.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
-
-# HACK since Elastic Beanstalk don't use env variables for python?
-os.environ['RDS_PORT'] = "5432"
-os.environ['RDS_PASSWORD'] = "UBdT!hP5hYJw"
-os.environ['RDS_USERNAME'] = "ekajmiller"
-os.environ['RDS_DB_NAME'] = "magicleague"
-os.environ['RDS_HOSTNAME'] = "magicleague.cjduwx2c3jsg.us-west-2.rds.amazonaws.com"
 
 DATABASES = {
     'default': {
@@ -117,4 +109,4 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-LOGIN_REDIRECT_URL = "/leaguematches/"
+LOGIN_REDIRECT_URL = "/"

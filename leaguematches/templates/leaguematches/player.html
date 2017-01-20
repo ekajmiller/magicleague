@@ -16,14 +16,14 @@
 {% if user.is_authenticated %}
     <h2>{{ player.user.email }}</h2>
     {% if user.player.id == player.id %}
-        <h3><a href="/leaguematches/profile/">Edit your profile</a></h3>
+        <h3><a href="/profile/">Edit your profile</a></h3>
     {% endif %}
 {% endif %}
 <h2>Seasons</h2>
-<form action="/leaguematches/player/{{player.id}}/" method="post">
+<form action="/player/{{player.id}}/" method="post">
     {% csrf_token %}
     {% for season, opponents, rounds in matches reversed %}
-        <h3><a href="/leaguematches/season/{{season.id}}/">{{ season }}</a></h3>
+        <h3><a href="/season/{{season.id}}/">{{ season }}</a></h3>
         {% for round, matches in rounds reversed %}
             <h4>Round {{ round }}</h4>
             <table>

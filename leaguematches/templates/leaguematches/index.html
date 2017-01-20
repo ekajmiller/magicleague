@@ -15,7 +15,7 @@ If you belong here, this site will give you a nice report of what's going on in 
 <h2>Seasons</h2>
 <ul>
 {% for season in season_list reversed %}
-    <li><a href="/leaguematches/season/{{ season.id }}/">{{ season }}</a></li>
+    <li><a href="/season/{{ season.id }}/">{{ season }}</a></li>
 {% empty %}
     <p>No seasons are available.</p>
 {% endfor %}

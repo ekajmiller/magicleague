@@ -17,4 +17,4 @@ urlpatterns_dev = [
 ]
 
 # For some reason can't get this to work for both dev and not dev
-urlpatterns = urlpatterns_dev
+urlpatterns = urlpatterns_prod_admin

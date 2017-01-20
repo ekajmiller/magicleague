@@ -48,11 +48,11 @@
 <body>
     <div class="topbar">
         {% block topbar %}
-        <p class="alignleft"><a href="/leaguematches/">Magic McDillerton</a></p>
+        <p class="alignleft"><a href="/">Magic McDillerton</a></p>
         {% if user.is_authenticated %}
-            <p class="alignright">Hi <a href="/leaguematches/player/{{user.player.id}}">{{user.first_name}}</a>. <a href="/leaguematches/logout/">Logout</a></p>
+            <p class="alignright">Hi <a href="/player/{{user.player.id}}">{{user.first_name}}</a>. <a href="/logout/">Logout</a></p>
         {% else %}
-            <p class="alignright"><a href="/leaguematches/login/">Login</a></p>
+            <p class="alignright"><a href="/login/">Login</a></p>
         {% endif %}
         {% endblock %}
     </div>

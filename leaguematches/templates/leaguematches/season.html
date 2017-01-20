@@ -22,7 +22,7 @@
     {% for p_res in total_results %}
     <tr>
         <td>{{forloop.counter}}</td>
-        <td><a href="/leaguematches/player/{{p_res.player.id}}/">{{p_res.player}}</a></td>
+        <td><a href="/player/{{p_res.player.id}}/">{{p_res.player}}</a></td>
         <td>{{p_res.main_pts}}</td>
         <td>{{p_res.tb_pts}}</td>
         <td>{{p_res.main_wins}}-{{p_res.main_losses}}</td>
@@ -45,7 +45,7 @@
         {% for p_res in round_res %}
         <tr>
             <td>{{forloop.counter}}</td>
-            <td><a href="/leaguematches/player/{{p_res.player.id}}/">{{p_res.player}}</a></td>
+            <td><a href="/player/{{p_res.player.id}}/">{{p_res.player}}</a></td>
             <td>{{p_res.main_pts}}</td>
             <td>{{p_res.tb_pts}}</td>
             <td>{{p_res.main_wins}}-{{p_res.main_losses}}</td>
