@@ -23,13 +23,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '956l*8&j&!vjz&x$+ir&l35c+2kt(8xr=hosgxty+wc9tn@ya-'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True 
+DEBUG = False 
 
 #ALLOWED_HOSTS = ['vsnake', '.mcdillers.com', '127.0.0.1']
 ALLOWED_HOSTS = ['.mcdillers.com']
 
-#CSRF_COOKIE_SECURE = True
-#SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # Application definition
 
