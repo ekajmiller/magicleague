@@ -1,1 +1,14 @@
 Remember to collect your static files into /static directory.
+
+Also you need a config.py in root directory with the following vars set:
+
+DA_SECRET_KEY
+DA_ALLOWED_HOSTS
+DA_DB_HOSTNAME
+DA_DB_PORT
+DA_DB_NAME
+DA_DB_USERNAME
+DA_DB_PASSWORD
+
+All of these are strings except for DB_ALLOWED_HOSTS which is a list of
+strings.
