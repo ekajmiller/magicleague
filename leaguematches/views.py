@@ -215,7 +215,7 @@ def player(request, player_id):
                     break
         if errmsg:
             messages.error(request, errmsg)
-        return redirect('/leaguematches/player/' + str(player_id))
+        return redirect('/player/' + str(player_id))
     else:
         #[ [season1, opponents, [[round1, [matchlist], [round2, [matchlist]] ... ]]], season2, ...]
         player_matches = MatchOrder.objects.filter(player=player_id)
@@ -262,7 +262,7 @@ def profile(request):
             request.user.save()
             if password_changed:
                 update_session_auth_hash(request, request.user)
-            return redirect('/leaguematches/player/' + str(request.user.id))
+            return redirect('/player/' + str(request.user.id))
     else:
         form = ProfileForm(initial={'username': request.user.username,
                                     'email': request.user.email,
