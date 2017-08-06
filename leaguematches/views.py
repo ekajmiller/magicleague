@@ -262,7 +262,6 @@ def profile(request):
             request.user.save()
             if password_changed:
                 update_session_auth_hash(request, request.user)
-            return redirect('/player/' + str(request.user.id))
     else:
         form = ProfileForm(initial={'username': request.user.username,
                                     'email': request.user.email,
