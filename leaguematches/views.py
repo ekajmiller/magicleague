@@ -135,8 +135,8 @@ def season(request, season_id):
     total_results = sorted(total_results, key=itemgetter('main_pts', 'tb_pts'), reverse=True)
 
     # Get first and last matches to display season start to season end
-    earliest_match_date = MatchReport.objects.order_by('played_date', 'report_date')[0].played_date
-    latest_match_date = MatchReport.objects.order_by('-played_date', '-report_date')[0].played_date
+    earliest_match_date = MatchReport.objects.filter(season=season).order_by('played_date', 'report_date')[0].played_date
+    latest_match_date = MatchReport.objects.filter(season=season).order_by('-played_date', '-report_date')[0].played_date
 
     context = {'season': Season.objects.get(id=season_id),
                'matches': MatchReport.objects.filter(season__id=season_id),
